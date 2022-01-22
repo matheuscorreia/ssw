@@ -4,11 +4,14 @@
   "description": "Wallpaper Engine - Solar system wallpaper with real orbit speeds",
   "main": "index.js",
   "scripts": {
-    "dev": "http-server ."
+    "dev": "parcel serve index.html"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "http-server": "^14.1.0"
+    "parcel": "^2.2.1"
+  },
+  "dependencies": {
+    "julian": "^0.2.0"
   }
 }

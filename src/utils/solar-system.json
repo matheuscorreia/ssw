@@ -1,0 +1,193 @@
+{
+  "references": [
+    "https://ssd.jpl.nasa.gov/planets/phys_par.html",
+    "https://ssd.jpl.nasa.gov/planets/approx_pos.html#tables",
+    "https://nssdc.gsfc.nasa.gov/planetary/factsheet/sunfact.html"
+  ],
+  "units": {
+    "radius": "km",
+    "density": "kg/m³"
+  },
+  "sun": {
+    "name": "Sun",
+    "placement": 0,
+    "radius": 695700,
+    "density": 1408
+  },
+  "mercury": {
+    "name": "Mercury",
+    "radius": 2439.4,
+    "density": 5428.9,
+    "placement": 1,
+    "orbitalElements": {
+      "semiMajorAxis": 0.38709927,
+      "eccentricity": 0.20563593,
+      "inclination": 7.00497902,
+      "meanLongitude": 252.25032350,
+      "perihelionLongitude": 77.45779628,
+      "ascendingNodeLongitude": 48.33076593
+    },
+    "orbitalElementsRates": {
+      "semiMajorAxis": 0.00000037,
+      "eccentricity": 0.00001906,
+      "inclination": -0.00594749,
+      "meanLongitude": 149472.67411175,
+      "perihelionLongitude": 0.16047689,
+      "ascendingNodeLongitude": -0.12534081
+    }
+  },
+  "venus": {
+    "name": "Venus",
+    "radius": 6051.8,
+    "density": 5243,
+    "placement": 2,
+    "orbitalElements": {
+      "semiMajorAxis": 0.72333566,
+      "eccentricity": 0.00677672,
+      "inclination": 3.39467605,
+      "meanLongitude": 181.97909950,
+      "perihelionLongitude": 131.60246718,
+      "ascendingNodeLongitude": 76.67984255
+    },
+    "orbitalElementsRates": {
+      "semiMajorAxis": 0.00000390,
+      "eccentricity": -0.00004107,
+      "inclination": -0.00078890,
+      "meanLongitude": 58517.81538729,
+      "perihelionLongitude": 0.00268329,
+      "ascendingNodeLongitude": -0.27769418
+    }
+  },
+  "earth": {
+    "name": "Earth",
+    "radius": 6371.0084,
+    "density": 5513.4,
+    "placement": 3,
+    "orbitalElements": {
+      "semiMajorAxis": 1.00000261,
+      "eccentricity": 0.01671123,
+      "inclination": -0.00001531,
+      "meanLongitude": 100.46457166,
+      "perihelionLongitude": 102.93768193,
+      "ascendingNodeLongitude": 0
+    },
+    "orbitalElementsRates": {
+      "semiMajorAxis": 0.00000562,
+      "eccentricity": -0.00004392,
+      "inclination": -0.01294668,
+      "meanLongitude": 35999.37244981,
+      "perihelionLongitude": 0.32327364,
+      "ascendingNodeLongitude": 0
+    }
+  },
+  "mars": {
+    "name": "Mars",
+    "radius": 3389.50,
+    "density": 3934.0,
+    "placement": 4,
+    "orbitalElements": {
+      "semiMajorAxis": 1.52371034,
+      "eccentricity": 0.09339410,
+      "inclination": 1.84969142,
+      "meanLongitude": -4.55343205,
+      "perihelionLongitude": -23.94362959,
+      "ascendingNodeLongitude": 49.55953891
+    },
+    "orbitalElementsRates": {
+      "semiMajorAxis": 0.00001847,
+      "eccentricity": 0.00007882,
+      "inclination": -0.00813131,
+      "meanLongitude": 19140.30268499,
+      "perihelionLongitude": 0.44441088,
+      "ascendingNodeLongitude": -0.29257343
+    }
+  },
+  "jupiter": {
+    "name": "Jupiter",
+    "radius": 69911,
+    "density": 1326.2,
+    "placement": 5,
+    "orbitalElements": {
+      "semiMajorAxis": 5.20288700,
+      "eccentricity": 0.04838624,
+      "inclination": 1.30439695,
+      "meanLongitude": 34.39644051,
+      "perihelionLongitude": 14.72847983,
+      "ascendingNodeLongitude": 100.47390909
+    },
+    "orbitalElementsRates": {
+      "semiMajorAxis": -0.00011607,
+      "eccentricity": -0.00013253,
+      "inclination": -0.00183714,
+      "meanLongitude": 3034.74612775,
+      "perihelionLongitude": 0.21252668,
+      "ascendingNodeLongitude": 0.20469106
+    }
+  },
+  "saturn": {
+    "name": "Saturn",
+    "radius": 58232,
+    "density": 687.1,
+    "placement": 6,
+    "orbitalElements": {
+      "semiMajorAxis": 9.53667594,
+      "eccentricity": 0.05386179,
+      "inclination": 2.48599187,
+      "meanLongitude": 49.95424423,
+      "perihelionLongitude": 92.59887831,
+      "ascendingNodeLongitude": 113.66242448
+    },
+    "orbitalElementsRates": {
+      "semiMajorAxis": -0.00125060,
+      "eccentricity": -0.00050991,
+      "inclination": 0.00193609,
+      "meanLongitude": 1222.49362201,
+      "perihelionLongitude": -0.41897216,
+      "ascendingNodeLongitude": -0.28867794
+    }
+  },
+  "uranus": {
+    "name": "Uranus",
+    "radius": 25362,
+    "density": 1270,
+    "placement": 7,
+    "orbitalElements": {
+      "semiMajorAxis": 19.18916464,
+      "eccentricity": 0.04725744,
+      "inclination": 0.77263783,
+      "meanLongitude": 313.23810451,
+      "perihelionLongitude": 170.95427630,
+      "ascendingNodeLongitude": 74.01692503
+    },
+    "orbitalElementsRates": {
+      "semiMajorAxis": -0.00196176,
+      "eccentricity": -0.00004397,
+      "inclination": -0.00242939,
+      "meanLongitude": 428.48202785,
+      "perihelionLongitude": 0.40805281,
+      "ascendingNodeLongitude": 0.04240589
+    }
+  },
+  "neptune": {
+    "name": "Neptune",
+    "radius": 24622,
+    "density": 1638,
+    "placement": 8,
+    "orbitalElements": {
+      "semiMajorAxis": 30.06992276,
+      "eccentricity": 0.00859048,
+      "inclination": 1.77004347,
+      "meanLongitude": -55.12002969,
+      "perihelionLongitude": 44.96476227,
+      "ascendingNodeLongitude": 131.78422574
+    },
+    "orbitalElementsRates": {
+      "semiMajorAxis": 0.00026291,
+      "eccentricity": 0.00005105,
+      "inclination": 0.00035372,
+      "meanLongitude": 218.45945325,
+      "perihelionLongitude": -0.32241464,
+      "ascendingNodeLongitude": -0.00508664
+    }
+  }
+}

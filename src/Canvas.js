@@ -1,5 +1,0 @@
-class Canvas {
-  constructor(elementId) {
-
-  }
-}
