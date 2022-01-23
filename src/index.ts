@@ -1,9 +1,10 @@
 import CelestialBody from "./entities/CelestialBody";
-import Stage, { SolarSystemScaleOptions } from "./entities/render/Stage";
+import Stage from "./entities/SolarSystem";
+import { EDistanceScale } from "./entities/types";
 import solarSystem from './utils/solar-system.json';
 
 const stage = new Stage('main-stage', {
-    solarSystemScale: SolarSystemScaleOptions.LINEAR,
+    distanceScale: EDistanceScale.LINEAR,
 });
 
 stage.add(new CelestialBody(solarSystem.sun));
