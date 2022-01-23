@@ -1,7 +1,11 @@
-import SceneObject, { RenderProps } from './render/SceneObject';
-import { calculateOrbitElementsInTime, getHeliocentricCoordinates } from '../utils/celestial-mechanics';
-import { SolarSystemScaleOptions } from './render/Stage';
-import { toRadians } from '../utils/math'
+import { calculateOrbitElementsInTime } from '../utils/celestial-mechanics';
+import { toRadians } from '../utils/math';
+import * as renderUtils from '../utils/render';
+import { Position, RenderProperties } from './types';
+
+const ORBIT_SIZE_SCALE = 40;
+// [0 -> 1] Defines how "warped" the ellipses will be shaped up until it becomes a perfect cicle while maintaing the ellipsis focal point offset
+const ORBIT_ECCENTRICITY_SCALE = 0;
 
 type KeplerianElements = {
     semiMajorAxis: number;
@@ -12,8 +16,27 @@ type KeplerianElements = {
     ascendingNodeLongitude: number;
 }
 
+type CalculatedElements = {
+    meanAnomaly: number;
+    eccentricAnomaly: number;
+    trueAnomaly: number;
+}
+
 interface OrbitalElements extends KeplerianElements { };
 interface OrbitalElementsRates extends KeplerianElements { };
+interface OrbitalElementsInTime extends KeplerianElements, CalculatedElements { };
+
+interface OrbitCoordinates {
+    centerX: number;
+    centerY: number;
+    focusX: number;
+    focusY: number;
+    radiusX: number;
+    radiusY: number;
+    orbiterX: number;
+    orbiterY: number;
+    rotation: number;
+}
 
 interface CelestialBodyConstructorArgs {
     name: string;
@@ -24,7 +47,8 @@ interface CelestialBodyConstructorArgs {
     orbitalElementsRates?: OrbitalElementsRates;
 }
 
-class CelestialBody extends SceneObject {
+class CelestialBody {
+    private pos: Position;
     private name: string;
     private radius: number;
     private density: number;
@@ -32,11 +56,12 @@ class CelestialBody extends SceneObject {
     private orbitalElements?: OrbitalElements;
     private orbitalElementsRates?: OrbitalElementsRates;
 
+    private frameDelta: number;
+    private orbitalElementsInTime?: OrbitalElementsInTime;
+    private orbitCoordinates?: OrbitCoordinates;
+
     constructor({ name, radius, density, placement, orbitalElements, orbitalElementsRates }: CelestialBodyConstructorArgs) {
-        super({
-            posX: 0,
-            posY: 0,
-        });
+        this.pos = { x: 0, y: 0 };
 
         this.name = name;
         this.radius = radius;
@@ -46,11 +71,18 @@ class CelestialBody extends SceneObject {
         this.orbitalElementsRates = orbitalElementsRates;
     }
 
-    getOrbitElementsInTime(julianCenturiesFromEpoch: number) {
+    clearCalculations() {
+        this.orbitalElementsInTime = undefined;
+        this.orbitCoordinates = undefined;
+    }
+
+    getOrbitElementsInTime(julianCenturiesFromEpoch: number): OrbitalElementsInTime {
         // If no orbit information, then it's a static body (The Sun)
         if (!this.orbitalElements || !this.orbitalElementsRates) {
-            return null;
+            return;
         }
+
+        if (this.orbitalElementsInTime) return this.orbitalElementsInTime;
 
         const t = julianCenturiesFromEpoch;
 
@@ -72,49 +104,122 @@ class CelestialBody extends SceneObject {
         const o = this.orbitalElements.ascendingNodeLongitude;
         const or = this.orbitalElementsRates.ascendingNodeLongitude;
 
-        return calculateOrbitElementsInTime(t, a, ar, e, er, i, ir, l, lr, w, wr, o, or);
+        const calculatedElements = calculateOrbitElementsInTime(t, a, ar, e, er, i, ir, l, lr, w, wr, o, or);
+
+        this.orbitalElementsInTime = {
+            semiMajorAxis: calculatedElements.a,
+            eccentricity: calculatedElements.e,
+            inclination: calculatedElements.i,
+            meanLongitude: calculatedElements.l,
+            perihelionLongitude: calculatedElements.w,
+            ascendingNodeLongitude: calculatedElements.o,
+            meanAnomaly: calculatedElements.m,
+            eccentricAnomaly: calculatedElements.ea,
+            trueAnomaly: calculatedElements.ta,
+        }
+
+        return this.orbitalElementsInTime;
     }
 
-    draw(ctx: CanvasRenderingContext2D, { stageCenter, t , solarSystemScale, planetsScale }: RenderProps) {
-        const elements = this.getOrbitElementsInTime(t);
+    getCoordinates(props: RenderProperties) {
+        if (this.orbitCoordinates) return this.orbitCoordinates;
 
-        let hCoords;
-        if (elements) {
-            hCoords = getHeliocentricCoordinates(
-                elements.a,
-                elements.e,
-                elements.i,
-                elements.w,
-                elements.o,
-                elements.ea,
-                elements.ta,
-            );
-        } else {
-            hCoords = [0, 0];
-        }
-        let newX
-        let newY
-        if (solarSystemScale === SolarSystemScaleOptions.LINEAR) {
-            const orbitPosition = elements ? elements.l : 0;
+        const elements = this.getOrbitElementsInTime(props.t);
+        if (!elements) return;
 
-            newX = stageCenter.x + Math.cos(toRadians(orbitPosition)) * this.placement * 40;
-            newY = stageCenter.y + Math.sin(toRadians(orbitPosition)) * this.placement * 40;
-        } else {
-            newX = stageCenter.x + hCoords[0] * 100;
-            newY = stageCenter.y + hCoords[1] * 100;
-        }
+        let centerX;
+        let centerY;
+        let radiusX;
+        let radiusY;
+        let focusX;
+        let focusY;
+        let orbiterX;
+        let orbiterY;
+        let rotation;
+
+        const { semiMajorAxis, eccentricity, perihelionLongitude, meanLongitude } = elements;
+        const semiMinorAxis = semiMajorAxis * (1 - eccentricity);
+
+        const radiusDiff = semiMajorAxis - semiMinorAxis;
+        radiusX = this.placement * ORBIT_SIZE_SCALE;
+        radiusY = (this.placement * ORBIT_SIZE_SCALE) - (radiusDiff * ORBIT_SIZE_SCALE);
+
+        // adjust eccentricity
+        radiusY = radiusY + (radiusX - radiusY) * Math.abs(ORBIT_ECCENTRICITY_SCALE - 1)
+
+        const centerFociDistance = radiusX * eccentricity
+
+        rotation = toRadians(perihelionLongitude);
+
+        // place center of the elipsse so that it rotates around the focal point;
+        centerX = props.stageCenter.x + (Math.cos(rotation) * centerFociDistance);
+        centerY = props.stageCenter.y + (Math.sin(rotation) * centerFociDistance);
         
+        const radianMeanLongitude = toRadians(meanLongitude);
+        orbiterX = centerX + (Math.cos(radianMeanLongitude) * radiusX);
+        orbiterY = centerY + (Math.sin(radianMeanLongitude) * radiusY);
 
-        let radius = 5;
+        this.orbitCoordinates = {
+            centerX,
+            centerY,
+            focusX,
+            focusY,
+            radiusX,
+            radiusY,
+            orbiterX,
+            orbiterY,
+            rotation,
+        }
 
-        this.pos.x = newX;
-        this.pos.y = newY;
+        return this.orbitCoordinates;
+    }
 
-        ctx.beginPath();
-        ctx.arc(this.pos.x, this.pos.y, radius, 0, 2 * Math.PI, true);
-        ctx.fillStyle = 'red';
-        ctx.fill();
-        ctx.closePath();
+    drawOrbit(ctx: CanvasRenderingContext2D, props: RenderProperties) {
+        const coordinates = this.getCoordinates(props);
+        if (!coordinates) return;
+
+        const { centerX, centerY, radiusX, radiusY, rotation } = coordinates;
+
+        renderUtils.drawOrbit(ctx, {
+            centerX,
+            centerY,
+            radiusX,
+            radiusY,
+            rotation,
+        })
+    }
+
+    drawBody(ctx: CanvasRenderingContext2D, props: RenderProperties) {
+        const coordinates = this.getCoordinates(props);
+        if (!coordinates) {
+            return renderUtils.drawPlanet(ctx, {
+                x: props.stageCenter.x,
+                y: props.stageCenter.y,
+                radius: 10,
+            });
+        };
+
+        const { orbiterX, orbiterY } = coordinates;
+
+        renderUtils.drawPlanet(ctx, {
+            x: orbiterX,
+            y: orbiterY,
+            radius: 10,
+        });
+    }
+
+    draw(ctx: CanvasRenderingContext2D, props: RenderProperties) {
+        if (this.frameDelta !== props.delta) {
+            this.clearCalculations();
+            this.frameDelta = props.delta;
+        }
+
+        this.drawOrbit(ctx, props);
+        this.drawBody(ctx, props);
+    }
+
+    update(ctx: CanvasRenderingContext2D, props: RenderProperties) {
+        return this.draw(ctx, props);
     }
 }
 

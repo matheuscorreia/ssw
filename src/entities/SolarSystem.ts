@@ -1,34 +1,29 @@
-import SceneObject from './SceneObject';
-import { Position } from './types';
-import * as renderUtils from '../../utils/render';
-import * as datesUtils from '../../utils/dates';
+import CelestialBody from './CelestialBody';
+import { Position, RenderProperties, EDistanceScale } from './types';
+import * as renderUtils from '../utils/render';
+import * as datesUtils from '../utils/dates';
 
-export enum SolarSystemScaleOptions {
-    ACCURATE,
-    LINEAR,
+interface SolarSystemOptions {
+    distanceScale?: EDistanceScale;
 }
 
-interface StageOptions {
-    solarSystemScale?: SolarSystemScaleOptions;
-    objectScale?: number;
-}
-
-class Stage {
+class SolarSystem {
     private canvas: HTMLCanvasElement;
     private ctx: CanvasRenderingContext2D;
-    private objects: SceneObject[];
+    private start?: number;
+    private objects: CelestialBody[];
     private requestedAnimationFrameID?: number;
     private isPaused: boolean = true;
     private stageCenter: Position = { x: 0, y: 0 };
-    private opts: StageOptions;
+
+    private opts: SolarSystemOptions;
     private julianDay: number;
 
-    constructor(elementId: string, opts?: StageOptions, objects?: SceneObject[]) {
+    constructor(elementId: string, opts?: SolarSystemOptions, objects?: CelestialBody[]) {
         this.canvas = document.getElementById(elementId) as HTMLCanvasElement;
         this.ctx = this.canvas.getContext('2d');
         this.opts = opts || {
-            solarSystemScale: SolarSystemScaleOptions.LINEAR,
-            objectScale: 1,
+            distanceScale: EDistanceScale.LINEAR,
         };
 
         this.resizeCanvas();
@@ -57,7 +52,7 @@ class Stage {
         this.stageCenter.x = this.canvas.width / 2;
     }
 
-    add(...objects: SceneObject[]) {
+    add(...objects: CelestialBody[]) {
         this.objects.push(...objects);
     }
 
@@ -70,23 +65,30 @@ class Stage {
             cancelAnimationFrame(this.requestedAnimationFrameID);
         }
 
-        this.animate();
+        this.animate(0);
     }
 
-    private animate() {
+    private animate(frameTime: DOMHighResTimeStamp) {
         requestAnimationFrame(this.animate.bind(this))
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
         
+        if (!this.start) {
+            this.start = frameTime;
+        }
+
+        const delta = frameTime - this.start;
+
         this.objects.forEach(object => {
             object.update(this.ctx, {
-                stageCenter: this.stageCenter,
-                solarSystemScale: this.opts.solarSystemScale,
                 t: datesUtils.centuriesFromJ2000(this.julianDay),
+                stageCenter: this.stageCenter,
+                distanceScale: this.opts.distanceScale,
+                delta,
             })
         })
 
-        this.julianDay += 10
+        this.julianDay += 0.1;
     }
 }
 
-export default Stage;
+export default SolarSystem;
